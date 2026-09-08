@@ -34,7 +34,7 @@
         <div id="clock">--:--</div>
         <div id="date">--</div>
         <h1>NEUES AUS TRIER &amp; REGION</h1>
-        <div id="newsbox" id="news">Lade aktuelle Nachrichten...</div>
+        <div id="newsbox">Lade aktuelle Nachrichten...</div>
         <div id="hint">Aktualisierung der Nachrichten alle 15 Minuten</div>
     </main>
     <script>
@@ -45,33 +45,45 @@
             document.body.className=(h>=22||h<7)?'night':''
         }
 
-        async function reloadNews(){
+        function reloadNews(){
             const newsbox = document.getElementById('newsbox');
-            // Nutzt den RSS-Feed von Tagesschau Regionen als stabilen Text-Ersatz für Trier/Rheinland-Pfalz
+            // Nutzt einen stabilen, alternativen CORS-Proxy für die Tagesschau-Meldungen
             const rssUrl = 'https://tagesschau.de'; 
-            const apiUrl = `https://rss2json.com{encodeURIComponent(rssUrl)}`;
+            const apiUrl = `https://allorigins.win{encodeURIComponent(rssUrl)}`;
 
-            try {
-                const response = await fetch(apiUrl);
-                const data = await response.json();
-                if(data.status === 'ok') {
+            fetch(apiUrl)
+                .then(response => {
+                    if (response.ok) return response.json();
+                    throw new Error('Netzwerk-Fehler');
+                })
+                .then(data => {
+                    // XML Text parsen
+                    const parser = new DOMParser();
+                    const xmlDoc = parser.parseFromString(data.contents, "text/xml");
+                    const items = xmlDoc.getElementsByTagName("item");
+                    
                     newsbox.innerHTML = '';
-                    data.items.forEach(item => {
-                        const date = new Date(item.pubDate);
+                    
+                    // Die ersten 15 Nachrichten anzeigen
+                    for (let i = 0; i < Math.min(items.length, 15); i++) {
+                        const title = items[i].getElementsByTagName("title")[0].textContent;
+                        let pubDate = items[i].getElementsByTagName("pubDate")[0].textContent;
+                        
+                        const date = new Date(pubDate);
                         const timeStr = date.toLocaleTimeString('de-DE', {hour: '2-digit', minute:'2-digit'}) + ' Uhr';
                         
                         const itemDiv = document.createElement('div');
                         itemDiv.className = 'news-item';
                         itemDiv.innerHTML = `
                             <div class="news-time">${timeStr}</div>
-                            <div class="news-title">${item.title}</div>
+                            <div class="news-title">${title}</div>
                         `;
                         newsbox.appendChild(itemDiv);
-                    });
-                }
-            } catch (e) {
-                newsbox.innerHTML = '<div style="text-align:center;padding:20px;opacity:0.5;">Nachrichten konnten nicht geladen werden.</div>';
-            }
+                    }
+                })
+                .catch(e => {
+                    newsbox.innerHTML = '<div style="text-align:center;padding:20px;opacity:0.5;">Nachrichten konnten nicht geladen werden. Bitte Seite neu laden.</div>';
+                });
         }
 
         update();
