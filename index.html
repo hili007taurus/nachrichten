@@ -1,7 +1,6 @@
 <!doctype html>
 <html lang="de">
 <head>
-    <!-- Einstellungen für den iPad-Vollbildmodus (Vollbild & Statusleiste) -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Trier News">
@@ -14,16 +13,20 @@
         html,body{margin:0;width:100%;height:100%;font-family:Arial,Helvetica,sans-serif}
         body{background:#f3f3f3;color:#111;overflow:hidden}
         main{box-sizing:border-box;width:100%;height:100%;padding:1.5vh 3vw;display:flex;flex-direction:column}
-        #clock{text-align:center;font-size:11vw;line-height:.88;font-weight:700;letter-spacing:-.03em}
-        #date{text-align:center;font-size:4.2vw;margin:.8vh 0 1.2vh;font-weight:600}
-        h1{text-align:center;font-size:1.8vw;margin:0 0 0.5vh}
-        #newsbox{flex:1;min-height:0;background:#fff;border-radius:12px;overflow:hidden}
-        iframe{width:100%;height:100%;border:0;background:#fff}
+        #clock{text-align:center;font-size:9vw;line-height:.88;font-weight:700;letter-spacing:-.03em}
+        #date{text-align:center;font-size:6vw;margin:.8vh 0 1.2vh;font-weight:600}
+        h1{text-align:center;font-size:2.2vw;margin:0 0 0.5vh}
+        #newsbox{flex:1;min-height:0;background:#fff;border-radius:12px;overflow-y:auto;padding:15px;box-shadow:inset 0 2px 5px rgba(0,0,0,0.05)}
+        .news-item{padding:12px 0;border-bottom:1px solid #eee;font-size:2.5vw;line-height:1.4}
+        .news-item:last-child{border-bottom:none}
+        .news-time{font-size:1.8vw;color:#777;margin-bottom:3px;font-weight:bold}
+        .news-title{font-weight:600;color:#000;text-decoration:none}
         #hint{text-align:center;font-size:1.5vw;margin:.5vh 0 0;opacity:.6}
         body.night{background:#101010;color:#eee}
         body.night #newsbox{background:#1c1c1c}
-        body.night iframe{filter:brightness(.62) contrast(.95)}
-        body.night #hint{opacity:.45}
+        body.night .news-item{border-bottom-color:#333}
+        body.night .news-title{color:#fff}
+        body.night .news-time{color:#aaa}
     </style>
 </head>
 <body>
@@ -31,9 +34,7 @@
         <div id="clock">--:--</div>
         <div id="date">--</div>
         <h1>NEUES AUS TRIER &amp; REGION</h1>
-        <div id="newsbox">
-            <iframe id="news" src="https://lokalo.de/trier-region/news-trier/" title="Aktuelle Nachrichten aus Trier"></iframe>
-        </div>
+        <div id="newsbox" id="news">Lade aktuelle Nachrichten...</div>
         <div id="hint">Aktualisierung der Nachrichten alle 15 Minuten</div>
     </main>
     <script>
@@ -43,10 +44,38 @@
             document.getElementById('date').textContent=n.toLocaleDateString('de-DE',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
             document.body.className=(h>=22||h<7)?'night':''
         }
-        function reloadNews(){
-            document.getElementById('news').src='https://lokalo.de/trier-region/news-trier/?refresh='+Date.now()
+
+        async function reloadNews(){
+            const newsbox = document.getElementById('newsbox');
+            // Nutzt den RSS-Feed von Tagesschau Regionen als stabilen Text-Ersatz für Trier/Rheinland-Pfalz
+            const rssUrl = 'https://tagesschau.de'; 
+            const apiUrl = `https://rss2json.com{encodeURIComponent(rssUrl)}`;
+
+            try {
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+                if(data.status === 'ok') {
+                    newsbox.innerHTML = '';
+                    data.items.forEach(item => {
+                        const date = new Date(item.pubDate);
+                        const timeStr = date.toLocaleTimeString('de-DE', {hour: '2-digit', minute:'2-digit'}) + ' Uhr';
+                        
+                        const itemDiv = document.createElement('div');
+                        itemDiv.className = 'news-item';
+                        itemDiv.innerHTML = `
+                            <div class="news-time">${timeStr}</div>
+                            <div class="news-title">${item.title}</div>
+                        `;
+                        newsbox.appendChild(itemDiv);
+                    });
+                }
+            } catch (e) {
+                newsbox.innerHTML = '<div style="text-align:center;padding:20px;opacity:0.5;">Nachrichten konnten nicht geladen werden.</div>';
+            }
         }
+
         update();
+        reloadNews();
         setInterval(update,1000);
         setInterval(reloadNews,900000);
     </script>
