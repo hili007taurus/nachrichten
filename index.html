@@ -1,1 +1,54 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Trier – Uhr & Nachrichten</title><style>html,body{margin:0;width:100%;height:100%;font-family:Arial,Helvetica,sans-serif}body{background:#f3f3f3;color:#111;overflow:hidden}main{box-sizing:border-box;width:100%;height:100%;padding:1.5vh 3vw;display:flex;flex-direction:column}#clock{text-align:center;font-size:11vw;line-height:.88;font-weight:700;letter-spacing:-.03em}#date{text-align:center;font-size:4.2vw;margin:.8vh 0 1.2vh;font-weight:600}h1{text-align:center;font-size:3.1vw;margin:0 0 1vh}#newsbox{flex:1;min-height:0;background:#fff;border-radius:12px;overflow:hidden}iframe{width:100%;height:100%;border:0;background:#fff}#hint{text-align:center;font-size:1.5vw;margin:.5vh 0 0;opacity:.6}body.night{background:#101010;color:#eee}body.night #newsbox{background:#1c1c1c}body.night iframe{filter:brightness(.62) contrast(.95)}body.night #hint{opacity:.45}</style></head><body><main><div id="clock">--:--</div><div id="date">--</div><h1>NEUES AUS TRIER &amp; REGION</h1><div id="newsbox"><iframe id="news" src="https://lokalo.de/trier-region/news-trier/" title="Aktuelle Nachrichten aus Trier"></iframe></div><div id="hint">Aktualisierung der Nachrichten alle 15 Minuten</div></main><script>function update(){const n=new Date(),h=n.getHours();document.getElementById('clock').textContent=n.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});document.getElementById('date').textContent=n.toLocaleDateString('de-DE',{weekday:'long',day:'numeric',month:'long',year:'numeric'});document.body.className=(h>=22||h<7)?'night':''}function reloadNews(){document.getElementById('news').src='https://lokalo.de/trier-region/news-trier/?refresh='+Date.now()}update();setInterval(update,1000);setInterval(reloadNews,900000);</script></body></html>
+<!doctype html>
+<html lang="de">
+<head>
+    <!-- Einstellungen für den iPad-Vollbildmodus (Vollbild & Statusleiste) -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Trier News">
+    <link rel="apple-touch-icon" href="https://lokalo.de">
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Trier – Uhr & Nachrichten</title>
+    <style>
+        html,body{margin:0;width:100%;height:100%;font-family:Arial,Helvetica,sans-serif}
+        body{background:#f3f3f3;color:#111;overflow:hidden}
+        main{box-sizing:border-box;width:100%;height:100%;padding:1.5vh 3vw;display:flex;flex-direction:column}
+        #clock{text-align:center;font-size:11vw;line-height:.88;font-weight:700;letter-spacing:-.03em}
+        #date{text-align:center;font-size:4.2vw;margin:.8vh 0 1.2vh;font-weight:600}
+        h1{text-align:center;font-size:3.1vw;margin:0 0 1vh}
+        #newsbox{flex:1;min-height:0;background:#fff;border-radius:12px;overflow:hidden}
+        iframe{width:100%;height:100%;border:0;background:#fff}
+        #hint{text-align:center;font-size:1.5vw;margin:.5vh 0 0;opacity:.6}
+        body.night{background:#101010;color:#eee}
+        body.night #newsbox{background:#1c1c1c}
+        body.night iframe{filter:brightness(.62) contrast(.95)}
+        body.night #hint{opacity:.45}
+    </style>
+</head>
+<body>
+    <main>
+        <div id="clock">--:--</div>
+        <div id="date">--</div>
+        <h1>NEUES AUS TRIER &amp; REGION</h1>
+        <div id="newsbox">
+            <iframe id="news" src="https://lokalo.de/trier-region/news-trier/" title="Aktuelle Nachrichten aus Trier"></iframe>
+        </div>
+        <div id="hint">Aktualisierung der Nachrichten alle 15 Minuten</div>
+    </main>
+    <script>
+        function update(){
+            const n=new Date(),h=n.getHours();
+            document.getElementById('clock').textContent=n.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});
+            document.getElementById('date').textContent=n.toLocaleDateString('de-DE',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+            document.body.className=(h>=22||h<7)?'night':''
+        }
+        function reloadNews(){
+            document.getElementById('news').src='https://lokalo.de/trier-region/news-trier/?refresh='+Date.now()
+        }
+        update();
+        setInterval(update,1000);
+        setInterval(reloadNews,900000);
+    </script>
+</body>
+</html>
